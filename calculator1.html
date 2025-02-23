@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Controlled Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .output {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .result {
+            font-size: 32px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Voice Controlled Calculator</h1>
+    <div class="output">Say a mathematical operation, like "two plus two" or "five multiplied by six".</div>
+    <button onclick="startListening()">Start Listening</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        // Check if SpeechRecognition is available
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        // Set language and interim results for continuous speech input
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        // Function to start voice recognition
+        function startListening() {
+            recognition.start();
+            console.log('Listening for voice input...');
+        }
+
+        // Handle the result of the voice input
+        recognition.onresult = function(event) {
+            const voiceInput = event.results[0][0].transcript.toLowerCase();
+            console.log('Voice input received: ' + voiceInput);
+
+            // Display the spoken input
+            document.querySelector('.output').textContent = `You said: ${voiceInput}`;
+
+            // Process the mathematical expression
+            const result = calculate(voiceInput);
+            document.getElementById('result').textContent = `Result: ${result}`;
+        };
+
+        // Handle errors in voice recognition
+        recognition.onerror = function(event) {
+            console.error('Error occurred in speech recognition: ' + event.error);
+            document.querySelector('.output').textContent = 'Sorry, I couldn\'t understand that. Please try again.';
+        };
+
+        // Function to process simple mathematical operations
+        function calculate(expression) {
+            try {
+                // Replace common words with math symbols
+                expression = expression.replace(/plus/g, '+')
+                                        .replace(/minus/g, '-')
+                                        .replace(/multiplied by/g, '*')
+                                        .replace(/divide by/g, '/')
+                                        .replace(/by/g, '');
+
+                // Evaluate the expression safely using eval
+                let result = eval(expression);
+
+                if (isNaN(result)) {
+                    return "Invalid operation.";
+                }
+
+                return result;
+            } catch (error) {
+                return "Error in operation.";
+            }
+        }
+    </script>
+    
+</body>
+</html>
